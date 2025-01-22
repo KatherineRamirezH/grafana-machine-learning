@@ -1,0 +1,1322 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 24,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 17,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "afterRender": "",
+        "content": "<h3 style=\"font-family: 'Arial', sans-serif; font-size: 22px; font-weight: bold; margin: 10px 0; color: #444; margin-left: 15px\">\n    Conjuntos de datos\n</h3>\n\n<table style=\"font-family: 'Arial', sans-serif; font-size: 16px; margin: 20px auto; border-collapse: collapse; text-align: center; line-height: 1.6; table-layout: fixed; margin-left: 15px; margin-right: 15px;\">\n  <colgroup>\n    <col style=\"width: 4%;\"> <!-- Id caso -->\n    <col style=\"width: 7%;\"> <!-- Nombre -->\n    <col style=\"width: 7%;\"> <!-- Creador -->\n    <col style=\"width: 30%;\"> <!-- Descripción -->\n    <col style=\"width: 10%;\"> <!-- Algoritmos -->\n  </colgroup>\n  <thead>\n    <tr style=\"background-color: #f2f2f2; border-bottom: 1px solid #ccc;\">\n      <th style=\"font-size: 18px; font-weight: bold; padding: 8px; text-align: center;\">Id caso</th>\n      <th style=\"font-size: 18px; font-weight: bold; padding: 8px; text-align: center;\">Nombre</th>\n      <th style=\"font-size: 18px; font-weight: bold; padding: 8px; text-align: center;\">Creador</th>\n      <th style=\"font-size: 18px; font-weight: bold; padding: 8px; text-align: center;\">Descripción</th>\n      <th style=\"font-size: 18px; font-weight: bold; padding: 8px; text-align: center;\">Algoritmos</th>\n    </tr>\n  </thead>\n  <tbody>\n    {{#each data}}\n      <tr style=\"border-bottom: 1px solid #ccc;\">\n        <td style=\"padding: 8px; text-align: center; font-size: 17px;\">{{id}}</td>\n        <td style=\"padding: 8px; text-align: center; font-size: 17px;\">{{name}}</td>\n        <td style=\"padding: 8px; text-align: center; font-size: 17px;\">{{creator}}</td>\n        <td style=\"padding: 8px; text-align: center; font-size: 17px;\">{{description}}</td>\n        <td style=\"padding: 8px; text-align: center; font-size: 17px;\">{{algorithms}}</td>\n      </tr>\n    {{/each}}\n  </tbody>\n</table>\n",
+        "contentPartials": [],
+        "defaultContent": "The query didn't return any results.",
+        "editor": {
+          "format": "auto",
+          "language": "handlebars"
+        },
+        "editors": [],
+        "externalStyles": [],
+        "helpers": "",
+        "renderMode": "allRows",
+        "styles": "",
+        "wrap": true
+      },
+      "pluginVersion": "5.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT \n    db_info.\"id\",\n    db_info.\"name\",\n    db_info.\"description\",\n    db_info.\"creator\",\n    STRING_AGG(algorithms_per_index.\"algorithm\", ', ') AS \"algorithms\"\nFROM (\n    SELECT *\n    FROM \"grafana_ml_model_index\"\n    WHERE \"id\" IN (\n        SELECT \"index\" FROM \"grafana_ml_model_correlation\"\n        UNION\n        SELECT \"index\" FROM \"grafana_ml_model_regression\"\n    )\n) AS db_info\nLEFT JOIN (\n    SELECT \n        \"id\",\n        'Correlación' AS \"algorithm\"\n    FROM \"grafana_ml_model_index\"\n    WHERE \"id\" IN (SELECT \"index\" FROM \"grafana_ml_model_correlation\")\n\n    UNION ALL\n\n    SELECT \n        \"id\",\n        'Regresión lineal' AS \"algorithm\"\n    FROM \"grafana_ml_model_index\"\n    WHERE \"id\" IN (SELECT \"index\" FROM \"grafana_ml_model_regression\" WHERE type='linear')\n    \n    UNION ALL\n    \n    SELECT \n        \"id\",\n        'Regresión logística' AS \"algorithm\"\n    FROM \"grafana_ml_model_index\"\n    WHERE \"id\" IN (SELECT \"index\" FROM \"grafana_ml_model_regression\" WHERE type='logistic')\n) AS algorithms_per_index\nON db_info.\"id\" = algorithms_per_index.\"id\"\nGROUP BY db_info.\"id\", db_info.\"name\", db_info.\"description\",  db_info.\"creator\"\nORDER BY db_info.\"id\";\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "marcusolsson-dynamictext-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 16,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 1,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data && context.panel.data.series.length > 0) {\n  const fieldsFeatures = context.panel.data.series[0].fields;\n  const fieldsCorrelations = context.panel.data.series[1].fields;\n\n  let nameFeature = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n  let nameFeatureR = [...nameFeature].reverse();\n  let featureNames1 = (fieldsCorrelations.find(fields => fields.name == 'name_feature1')).values;\n  let featureNames2 = (fieldsCorrelations.find(fields => fields.name == 'name_feature2')).values;\n  let correlation = (fieldsCorrelations.find(fields => fields.name == 'value')).values;\n\n  let correlationList = [];\n\n  // Crear un mapa para asignar índices a los nombres de las características\n  let featureIndexMap = new Map();\n  nameFeature.forEach((name, index) => {\n    featureIndexMap.set(name, index);\n  });\n\n  // Añadir la correlación entre las características iguales\n  for (let i = 0; i < nameFeature.length; i++) {\n    let feature1 = i;\n    let invertedFeature2 = (nameFeature.length - 1) - feature1;\n    correlationList.push([feature1, invertedFeature2, 1]);\n  }\n\n  // Formar lista de correlación\n  for (let i = 0; i < featureNames1.length; i++) {\n    let feature1Name = featureNames1[i];\n    let feature2Name = featureNames2[i];\n\n    // Obtener los índices de las características por su nombre\n    let feature1Index = featureIndexMap.get(feature1Name);\n    let feature2Index = featureIndexMap.get(feature2Name);\n\n    // Correlación para estas características\n    let corr = correlation[i];\n    corr = parseFloat(corr.toPrecision(3));\n\n    // Invertir las características para la visualización\n    let invertedFeature2 = (nameFeature.length - 1) - feature2Index;\n    let invertedFeature1 = (nameFeature.length - 1) - feature1Index;\n\n    correlationList.push([feature1Index, invertedFeature2, corr]);\n    correlationList.push([feature2Index, invertedFeature1, corr]);\n  }\n\n  // Configuración del gráfico\n  option = {\n    title: {\n      text: 'Matriz de correlación',\n      top: \"2%\",\n      left: \"2%\",\n      textStyle: {\n        fontSize: 22,\n      },\n    },\n    tooltip: {\n      position: 'top',\n      formatter: function (params) {\n        const feature1 = nameFeature[params.data[0]]; // Nombre de la característica 1\n        const feature2 = nameFeatureR[params.data[1]]; // Nombre de la característica 2\n        const corr = params.data[2]; // Correlación entre las características\n        return `\n        ${feature1}<br>\n        ${feature2}<br>\n        <strong>Correlación:</strong> ${corr}`;\n      }\n    },\n    grid: {\n      height: '90%',\n      containLabel: true,\n      left: \"3\",\n      right: \"7%\",\n      top: \"10%\"\n    },\n    xAxis: {\n      type: 'category',\n      data: nameFeature,\n      splitArea: {\n        show: true\n      },\n      axisLabel: {\n        show: true,\n        fontSize: 14,\n        color: '#444444',\n        rotate: 26\n      }\n    },\n    yAxis: {\n      type: 'category',\n      data: nameFeatureR,\n      splitArea: {\n        show: true,\n      },\n      axisLabel: {\n        show: true,\n        fontSize: 14,\n        color: '#444444',\n        rotate: 0\n      }\n    },\n    visualMap: {\n      min: -1,\n      max: 1,\n      type: 'continuous',\n      calculable: true,\n      orient: 'vertical',\n      left: 'right',\n      left: '94%',\n      bottom: '4%',\n      top: '14%',\n      itemHeight: '430',\n      inRange: {\n        color: getPalete(context.grafana.replaceVariables('${colorsC}'))\n      }\n    },\n    series: [\n      {\n        name: 'Correlación',\n        type: 'heatmap',\n        data: correlationList,\n        label: {\n          show: true\n        },\n        emphasis: {\n          itemStyle: {\n            shadowBlur: 10,\n            shadowColor: 'rgba(0, 0, 0, 0.5)'\n          }\n        }\n      }\n    ]\n  };\n\n  return option;\n}\n\n// Paleta de colores\nfunction getPalete(palete) {\n  let seLectedPaleteValue = ['#00539a', '#fff1f1', '#a2191f'];\n\n  if (palete == 'Paleta 1') {\n    seLectedPaleteValue = ['#00539a', '#fff1f1', '#a2191f'];\n  } else if (palete == 'Paleta 2') {\n    seLectedPaleteValue = ['#005d5d', '#f6f2ff', '#6929c4'];\n  } else if (palete == 'Paleta 3') {\n    seLectedPaleteValue = ['#e5f6ff', '#1192e8', '#003a6d'];\n  }\n\n  return seLectedPaleteValue;\n}\n",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Nombres de las características\n\nSELECT name\nFROM grafana_ml_model_feature\nWHERE index = $case\nORDER BY id\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Correlaciones\n\nSELECT \n    f1.name AS name_feature1,\n    f2.name AS name_feature2,\n    g.value\nFROM \n    grafana_ml_model_correlation g\nINNER JOIN \n    grafana_ml_model_feature f1 ON g.id_feature1 = f1.id\nINNER JOIN \n    grafana_ml_model_feature f2 ON g.id_feature2 = f2.id\nWHERE \n    f1.index=$case AND\n    f1.index=$case AND\n    g.index=$case AND\n    g.type='$typeCor';",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 16,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 2,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data && context.panel.data.series.length > 0) {\n  const fieldsFeatures = context.panel.data.series[0].fields;\n  const fieldsPoints = context.panel.data.series[2].fields;\n\n  // Obtener los valores de las características, correlaciones y puntos\n  let featureNames = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n  let pointNames = (fieldsPoints.find(fields => fields.name == 'point_name')).values;\n  let pointValues = (fieldsPoints.find(fields => fields.name == 'feature_values')).values;\n\n  // Asignación inicial para las características seleccionadas\n  var selectedFeatureX = featureNames[0];\n  var selectedFeatureY = featureNames[1];\n\n  let parsedValuesPoints = pointValues.map(value => JSON.parse(value));\n  const pointSeriesData = createSeriesData(parsedValuesPoints, selectedFeatureX, selectedFeatureY);\n\n  // Lógica para la selección\n  if (context.grafana.replaceVariables('${case}') || context.grafana.replaceVariables('${typeCor}')) {\n    let dom = context.panel.chart.getDom();\n    let nodeList = dom.childNodes;\n\n    if (nodeList.length > 2) {\n      nodeList[0].remove();\n    }\n\n    const container = document.createElement(\"div\");\n    container.style.display = \"flex\";\n    container.style.flexDirection = \"row\";\n    container.style.width = \"100%\";\n\n    const leftContainer = document.createElement(\"div\");\n    leftContainer.style.display = \"flex\";\n    leftContainer.style.flexDirection = \"column\";\n    leftContainer.style.flexGrow = \"1\";\n\n    const title = document.createElement(\"h3\");\n    title.innerHTML = \"Diagrama de dispersión\";\n    title.style.fontWeight = \"bold\";\n    title.style.fontSize = \"22px\";\n    title.style.fontFamily = \"'Arial', sans-serif\";\n    title.style.marginLeft = \"20px\";\n    title.style.marginTop = \"15px\";\n    title.style.color = \"#444\";\n\n    // Label de Correlación\n    const correlationLabel = document.createElement(\"div\");\n    correlationLabel.id = \"correlationLabel\";\n    correlationLabel.style.fontFamily = \"'Arial', sans-serif\";\n    correlationLabel.style.fontWeight = \"normal\";\n    correlationLabel.style.fontSize = \"24px\";\n    correlationLabel.style.marginTop = \"10px\";\n    correlationLabel.style.textAlign = \"center\";\n\n    let correlationValueInitial = getCorrelation(selectedFeatureX, selectedFeatureY);\n    correlationValueInitial = parseFloat(correlationValueInitial.toPrecision(3));\n    correlationLabel.innerHTML = `Correlación: ${correlationValueInitial}`;\n\n    // Añadir título y correlación al contenedor de la izquierda\n    leftContainer.appendChild(title);\n    leftContainer.appendChild(correlationLabel);\n\n    const rightContainer = document.createElement(\"div\");\n    rightContainer.style.display = \"flex\";\n    rightContainer.style.flexDirection = \"column\";\n    rightContainer.style.alignItems = \"flex-end\";\n    rightContainer.style.marginLeft = \"10px\";\n\n    // Eje X\n    const xAxisContainer = document.createElement(\"div\");\n    xAxisContainer.style.display = \"flex\";\n    xAxisContainer.style.alignItems = \"center\";\n    xAxisContainer.style.marginBottom = \"2px\";\n\n    const xAxisLabel = document.createElement(\"span\");\n    xAxisLabel.innerHTML = \"Eje x:\";\n    xAxisLabel.style.marginRight = \"6px\";\n    xAxisLabel.style.fontFamily = \"'Arial', sans-serif\";\n    xAxisLabel.style.fontWeight = \"bold\";\n    xAxisLabel.style.fontSize = \"18px\";\n    xAxisLabel.style.marginTop = \"20px\";\n    xAxisLabel.style.color = \"#444\";\n\n    const selectListX = document.createElement(\"select\");\n    selectListX.id = \"selectX\";\n    selectListX.style.fontFamily = \"'Arial', sans-serif\";\n    selectListX.style.border = \"1px solid gray\";\n    selectListX.style.borderRadius = \"8px\";\n    selectListX.style.padding = \"5px\";\n    selectListX.style.minWidth = \"120px\";\n    selectListX.style.marginTop = \"20px\";\n    selectListX.style.marginRight = \"10px\";\n\n    // Eje Y\n    const yAxisContainer = document.createElement(\"div\");\n    yAxisContainer.style.display = \"flex\";\n    yAxisContainer.style.alignItems = \"center\";\n    yAxisContainer.style.marginBottom = \"2px\";\n\n    const yAxisLabel = document.createElement(\"span\");\n    yAxisLabel.innerHTML = \"Eje y:\";\n    yAxisLabel.style.marginRight = \"6px\";\n    yAxisLabel.style.fontFamily = \"'Arial', sans-serif\";\n    yAxisLabel.style.fontWeight = \"bold\";\n    yAxisLabel.style.fontSize = \"18px\";\n    yAxisLabel.style.color = \"#444\";\n\n    const selectListY = document.createElement(\"select\");\n    selectListY.id = \"selectY\";\n    selectListY.style.fontFamily = \"'Arial', sans-serif\";\n    selectListY.style.border = \"1px solid gray\";\n    selectListY.style.borderRadius = \"8px\";\n    selectListY.style.padding = \"5px\";\n    selectListY.style.minWidth = \"120px\";\n    selectListY.style.marginRight = \"10px\";\n\n    featureNames.forEach((value) => {\n      const optionX = document.createElement(\"option\");\n      optionX.value = value;\n      optionX.text = value;\n      selectListX.appendChild(optionX);\n\n      const optionY = document.createElement(\"option\");\n      optionY.value = value;\n      optionY.text = value;\n      selectListY.appendChild(optionY);\n    });\n    selectListY.value = selectedFeatureY;\n\n    selectListX.addEventListener(\"change\", () => {\n      selectedFeatureX = selectListX.value; // Actualizar con el nombre de la característica\n      updateChartData();\n\n      let correlationValue = getCorrelation(selectedFeatureX, selectedFeatureY);\n      correlationValue = parseFloat(correlationValue.toPrecision(3));\n      correlationLabel.innerHTML = `Correlación: ${correlationValue}`;\n    });\n\n    selectListY.addEventListener(\"change\", () => {\n      selectedFeatureY = selectListY.value; // Actualizar con el nombre de la característica\n      updateChartData();\n\n      let correlationValue = getCorrelation(selectedFeatureX, selectedFeatureY);\n      correlationValue = parseFloat(correlationValue.toPrecision(3));\n      correlationLabel.innerHTML = `Correlación: ${correlationValue}`;\n    });\n\n    // Añadir los selectores al rightContainer\n    xAxisContainer.appendChild(xAxisLabel);\n    xAxisContainer.appendChild(selectListX);\n    yAxisContainer.appendChild(yAxisLabel);\n    yAxisContainer.appendChild(selectListY);\n\n    rightContainer.appendChild(xAxisContainer);\n    rightContainer.appendChild(yAxisContainer);\n\n    // Añadir el contenido completo al contenedor principal\n    container.appendChild(leftContainer);\n    container.appendChild(rightContainer);\n\n    dom.insertBefore(container, dom.firstChild);\n  }\n\n  // Función para actualizar el gráfico después de un cambio en la selección\n  function updateChartData() {\n    const pointSeriesData = createSeriesData(parsedValuesPoints, selectedFeatureX, selectedFeatureY);\n\n    context.panel.chart.setOption({\n      xAxis: {\n        name: selectedFeatureX,\n        min: () => calculateMargin(pointValues, featureNames.indexOf(selectedFeatureX))\n      },\n      yAxis: {\n        name: selectedFeatureY,\n        min: () => calculateMargin(pointValues, featureNames.indexOf(selectedFeatureY))\n      },\n      series: [\n        {\n          name: 'Puntos',\n          data: pointSeriesData,\n          symbolSize: context.grafana.replaceVariables('${sizeS}'),\n          symbol: getShape(context.grafana.replaceVariables('${shape}')),\n          itemStyle: {\n            color: '#888',\n            borderColor: '#555',\n          }\n        }\n      ]\n    });\n  }\n\n  option = {\n    tooltip: {\n      position: 'top',\n      formatter: function (params) {\n        const seriesIndex = params.seriesIndex;\n        const dataIndex = params.dataIndex;\n\n        let featureValues = (seriesIndex === 0 ? parsedValuesPoints : parsedValuesCentroids)[dataIndex];\n        const pointName = (seriesIndex === 0 ? pointNames : centroidNames)[dataIndex];\n        const featureX = featureValues[featureNames.indexOf(selectedFeatureX)];\n        const featureY = featureValues[featureNames.indexOf(selectedFeatureY)];\n\n        return `\n        <div><strong>${pointName}</strong></div>\n        <div>${selectedFeatureX}: ${parseFloat(featureX.toFixed(3))}</div>\n        <div>${selectedFeatureY}: ${parseFloat(featureY.toFixed(3))}</div>\n      `;\n      }\n    },\n    grid: {\n      bottom: \"25%\",\n      containLabel: true,\n      left: \"30\",\n      right: \"4%\",\n      top: \"3%\"\n    },\n    xAxis: {\n      type: 'value',\n      name: selectedFeatureX,\n      nameLocation: 'middle',\n      nameGap: 20,\n      min: () => calculateMargin(pointValues, featureNames.indexOf(selectedFeatureX)),\n      axisLabel: {\n        fontSize: 14,\n        color: ' #333'\n      },\n      nameTextStyle: {\n        fontSize: 18,\n        color: ' #333'\n      }\n    },\n    yAxis: {\n      type: 'value',\n      name: selectedFeatureY,\n      nameLocation: 'middle',\n      nameGap: 33,\n      min: () => calculateMargin(pointValues, featureNames.indexOf(selectedFeatureY)),\n      axisLabel: {\n        fontSize: 14,\n        color: ' #333'\n      },\n      nameTextStyle: {\n        fontSize: 18,\n        color: ' #333'\n      }\n\n    },\n    series: [\n      {\n        name: 'Puntos',\n        type: 'scatter',\n        encode: { tooltip: [0, 1] },\n        symbolSize: context.grafana.replaceVariables('${sizeS}'),\n        symbol: getShape(context.grafana.replaceVariables('${shape}')),\n        itemStyle: {\n          color: '#888',\n          borderColor: '#555',\n        },\n        data: pointSeriesData,\n      }\n    ]\n  };\n\n  return option;\n}\n\n// Función para crear los datos de la serie para el gráfico de dispersión\nfunction createSeriesData(parsedValuesPoints, selectedFeatureX, selectedFeatureY) {\n  const fieldsFeatures = context.panel.data.series[0].fields;\n  let featureNames = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n  let seriesData = [];\n\n  // Obtener el índice correspondiente al nombre de la característica X\n  let xIndex = featureNames.indexOf(selectedFeatureX);\n  let yIndex = featureNames.indexOf(selectedFeatureY);\n\n  // Verificar si los índices existen (no son -1)\n  if (xIndex === -1 || yIndex === -1) {\n    console.error(`Característica no encontrada. X: ${selectedFeatureX}, Y: ${selectedFeatureY}`);\n    return [];\n  }\n\n  let correlation = getCorrelation(selectedFeatureX, selectedFeatureY);\n\n  parsedValuesPoints.forEach(point => {\n    // Extraer los valores de las características seleccionadas (X e Y) usando sus índices\n    let xValue = point[xIndex]; // Usar el índice para obtener el valor de X\n    let yValue = point[yIndex]; // Usar el índice para obtener el valor de Y\n\n    let color = getColorForCorrelation(correlation);\n\n    // Añadir el punto de datos con las coordenadas X, Y y el color usando itemStyle\n    seriesData.push({\n      value: [xValue, yValue],  // Las coordenadas del punto\n      itemStyle: {\n        color: color  // Asignar el color calculado al punto\n      }\n    });\n  });\n\n  return seriesData;\n}\n\n// Función para obtener la correlación entre las características\nfunction getCorrelation(featureX, featureY) {\n  const fieldsCorrelations = context.panel.data.series[1].fields;\n\n  let featureNames1 = fieldsCorrelations.find(fields => fields.name === 'name_feature1');\n  let featureNames2 = fieldsCorrelations.find(fields => fields.name === 'name_feature2');\n  let correlationValues = fieldsCorrelations.find(fields => fields.name === 'value');\n\n  featureNames1 = featureNames1.values;\n  featureNames2 = featureNames2.values;\n  correlationValues = correlationValues.values;\n\n  // Buscar la correlación con los nombres de las características\n  for (let i = 0; i < featureNames1.length; i++) {\n    if ((featureNames1[i] === featureX && featureNames2[i] === featureY) ||\n      (featureNames1[i] === featureY && featureNames2[i] === featureX)) {\n      return correlationValues[i];\n    }\n  }\n\n  // Correlación perfecta consigo misma\n  if (featureX === featureY) {\n    return 1;\n  }\n\n  // Si no se encuentra la correlación\n  return -2;\n}\n\n// Función para obtener el color basado en la correlación\nfunction getColorForCorrelation(correlation) {\n  if (context.grafana.replaceVariables('${colorsC}') == 'Paleta 1') {\n    if (correlation >= 0.8) {\n      return '#a2191f'; // Alta correlación positiva \n    } else if (correlation >= 0.4) {\n      return '#fa4d56'; // Correlación positiva moderada \n    } else if (correlation >= -0.2) {\n      return '#ffd7d9'; // Correlación débil o neutra \n    } else if (correlation >= -0.8) {\n      return '#82cfff'; // Correlación negativa moderada \n    } else {\n      return '#00539a'; // Alta correlación negativa \n    }\n  } else if (context.grafana.replaceVariables('${colorsC}') == 'Paleta 2') {\n    if (correlation >= 0.8) {\n      return '#6929c4'; // Alta correlación positiva \n    } else if (correlation >= 0.4) {\n      return '#a56eff'; // Correlación positiva moderada\n    } else if (correlation >= -0.2) {\n      return '#d9fbfb'; // Correlación débil o neutra \n    } else if (correlation >= -0.8) {\n      return '#009d9a'; // Correlación negativa moderada \n    } else {\n      return '#005d5d'; // Alta correlación negativa \n    }\n  } else if (context.grafana.replaceVariables('${colorsC}') == 'Paleta 3') {\n    if (correlation >= 0.8) {\n      return '#001d6c'; // Alta correlación positiva \n    } else if (correlation >= 0.4) {\n      return '#0043ce'; // Correlación positiva moderada \n    } else if (correlation >= -0.2) {\n      return '#78a9ff'; // Correlación débil o neutra \n    } else if (correlation >= -0.8) {\n      return '#d0e2ff'; // Correlación negativa moderada \n    } else {\n      return '#edf5ff'; // Alta correlación negativa \n    }\n  }\n\n}\n\n// Calcular el margen del 5% basado en el rango de los datos\nfunction calculateMargin(values, axisIndex) {\n  const axisValues = values.map(value => JSON.parse(value)[axisIndex]);\n\n  // Encontrar el valor mínimo y máximo de los datos\n  const minValue = Math.min(...axisValues);\n  const maxValue = Math.max(...axisValues);\n\n  // Calcular el margen basado en el rango\n  const range = maxValue - minValue;\n  const margin = range * 0.04; // 4% de margen para los ejes\n\n  let result = minValue - margin;\n  result = parseFloat(result.toFixed(3));\n\n  return parseFloat(result); // Redondear\n}\n\n// Símbolo para los puntos\nfunction getShape(shape) {\n  let seLectedShapeValue = 'circle';\n\n  if (shape == 'Círculo') {\n    seLectedShapeValue = 'circle';\n  } else if (shape == 'Triángulo') {\n    seLectedShapeValue = 'triangle';\n  } else if (shape == 'Rectángulo') {\n    seLectedShapeValue = 'rect';\n  } else if (shape == 'Pin') {\n    seLectedShapeValue = 'pin';\n  }\n\n  return seLectedShapeValue;\n}\n",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Nombres de las carcaterísticas\n\nSELECT name\nFROM grafana_ml_model_feature\nWHERE index = $case\nORDER BY id\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT \n    f1.name AS name_feature1,\n    f2.name AS name_feature2,\n    g.value\nFROM \n    grafana_ml_model_correlation g\nINNER JOIN \n    grafana_ml_model_feature f1 ON g.id_feature1 = f1.id\nINNER JOIN \n    grafana_ml_model_feature f2 ON g.id_feature2 = f2.id\nWHERE \n    g.index = $case AND\n    g.type = '$typeCor';",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Puntos\n\nSELECT p.name AS point_name, \n       array_to_json(array_agg(pv.value)) AS feature_values\nFROM grafana_ml_model_point p\nJOIN grafana_ml_model_point_value pv \n  ON pv.id_point = p.id\nWHERE p.index = $case AND\n      pv.index=$case \nGROUP BY p.id\nLIMIT 500;",
+          "refId": "C",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 6,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data && context.panel.data.series.length > 0) {\n  const fieldsFeatures = context.panel.data.series[0].fields;\n  let uniqueNamesFeature = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n\n  let selectedFeature = uniqueNamesFeature[0];\n  let data = getCorrelation(selectedFeature);\n\n  // Lógica para la selección\n  if (context.grafana.replaceVariables('${case}') || context.grafana.replaceVariables('${typeCor}')) {\n    let dom = context.panel.chart.getDom();\n    let nodeList = dom.childNodes;\n\n    if (nodeList.length >= 2) {\n      nodeList[0].remove();\n    }\n\n    const container = document.createElement(\"div\");\n    container.style.display = \"flex\";\n    container.style.justifyContent = \"space-between\";\n    container.style.alignItems = \"center\";\n    container.style.marginTop = \"10px\";\n\n    const title = document.createElement(\"h3\");\n    title.innerHTML = \"Correlación entre una característica y todas las variables\";\n    title.style.marginLeft = \"20px\";\n    title.style.fontWeight = \"bold\";\n    title.style.fontSize = \"22px\";\n    title.style.fontFamily = \"'Arial', sans-serif\";\n    title.style.color = \"#444\";\n\n    const rightContainer = document.createElement(\"div\");\n    rightContainer.style.display = \"flex\";\n    rightContainer.style.alignItems = \"center\";\n\n    const characteristicLabel = document.createElement(\"span\");\n    characteristicLabel.innerHTML = \"Característica:\";\n    characteristicLabel.style.marginRight = \"6px\";\n    characteristicLabel.style.fontFamily = \"'Arial', sans-serif\";\n    characteristicLabel.style.fontWeight = \"bold\";\n    characteristicLabel.style.fontSize = \"20px\";\n    characteristicLabel.style.color = \"#444\";\n\n    const selectList = document.createElement(\"select\");\n    selectList.id = \"mySelect\";\n    selectList.style.fontFamily = \"'Arial', sans-serif\";\n\n    selectList.style.border = \"1px solid gray\";\n    selectList.style.borderRadius = \"8px\";\n    selectList.style.padding = \"5px\";\n    selectList.style.marginRight = \"10px\";\n\n    uniqueNamesFeature.forEach((value) => {\n      const option = document.createElement(\"option\");\n      option.value = value;\n      option.text = value;\n      selectList.appendChild(option);\n    });\n\n    selectList.addEventListener(\"change\", () => {\n      selectedFeature = selectList.value;\n      let result = getCorrelation(selectedFeature);\n\n      context.panel.chart.setOption({\n        dataset: {\n          source: result\n        },\n        yAxis: {\n          type: 'category',\n\n        },\n        series: [\n          {\n            type: 'bar',\n            encode: {\n              x: 'Correlación',\n              y: 'Característica'\n            }\n          }\n        ]\n      });\n    });\n\n    rightContainer.appendChild(characteristicLabel);\n    rightContainer.appendChild(selectList);\n\n    container.appendChild(title);\n    container.appendChild(rightContainer);\n\n    dom.insertBefore(container, dom.firstChild);\n  }\n\n  option = {\n    dataset: {\n      source: data\n    },\n    tooltip: {\n      trigger: 'item',\n      formatter: function (params) {\n        let correlationValue = params.data[0]; // Correlación\n        correlationValue = parseFloat(correlationValue.toPrecision(3))\n        const featureName = params.data[1]; // Nombre de la característica\n        return `\n      ${featureName}<br>\n      <strong>Correlación:</strong> ${correlationValue}\n    `;\n      }\n    },\n    grid: {\n      containLabel: true,\n      top: '4%',\n      left: '1%',\n      right: '10%'\n    },\n    xAxis: {\n      max: 1,\n      axisLabel: {\n        fontSize: 14,\n        color: '#444444'\n      }\n    },\n    yAxis: {\n      type: 'category',\n      axisLabel: {\n        fontSize: 14,\n        color: '#444444'\n      }\n\n    },\n    visualMap: {\n      orient: 'vertical',\n      left: 'right',\n      left: '92%',\n      bottom: '40%',\n      top: '10%',\n      itemHeight: '400',\n      min: -1,\n      max: 1,\n      dimension: 0,\n      inRange: {\n        color: getPalete(context.grafana.replaceVariables('${colorsC}'))\n      },\n      calculable: true\n    },\n    series: [\n      {\n        type: 'bar',\n        encode: {\n          x: 'Correlación',\n          y: 'Característica'\n        },\n\n      }\n    ]\n  };\n\n  return option;\n}\n\n\nfunction getCorrelation(selectedFeatureName) {\n  const fieldsFeatures = context.panel.data.series[0].fields;\n  const fieldsCorrelations = context.panel.data.series[1].fields;\n\n  let uniqueNamesFeature = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n  let featureNames1 = (fieldsCorrelations.find(fields => fields.name == 'name_feature1')).values;\n  let featureNames2 = (fieldsCorrelations.find(fields => fields.name == 'name_feature2')).values;\n  let correlation = (fieldsCorrelations.find(fields => fields.name == 'value')).values;\n\n  let result = [\n    ['Correlación', 'Característica']\n  ];\n\n  for (let i = 0; i < uniqueNamesFeature.length; i++) {\n    let currentFeature = uniqueNamesFeature[i];\n    let currentCorrelation = 0;\n\n    // Si la característica seleccionada es la misma que la actual, asigna correlación 1\n    if (currentFeature === selectedFeatureName) {\n      currentCorrelation = 1;\n    } else {\n      // Si no es la misma, buscamos la correlación en los arrays featureNames1 y featureNames2\n      for (let j = 0; j < featureNames1.length; j++) {\n        if ((featureNames1[j] === currentFeature && featureNames2[j] === selectedFeatureName) ||\n          (featureNames2[j] === currentFeature && featureNames1[j] === selectedFeatureName)) {\n          currentCorrelation = correlation[j];\n          break;\n        }\n      }\n    }\n\n    result.push([currentCorrelation, currentFeature]);\n  }\n\n  // Ordena el arreglo de correlaciones de menor a mayor (por la primera posición del array)\n  result.sort((a, b) => a[0] - b[0]);\n\n  return result;\n}\n\nfunction getPalete(palete) {\n  let seLectedPaleteValue = ['#00539a', '#fff1f1', '#a2191f'];\n\n  if (palete == 'Paleta 1') {\n    seLectedPaleteValue = ['#00539a', '#fff1f1', '#a2191f'];\n  } else if (palete == 'Paleta 2') {\n    seLectedPaleteValue = ['#005d5d', '#f6f2ff', '#6929c4'];\n  } else if (palete == 'Paleta 3') {\n    seLectedPaleteValue = ['#e5f6ff', '#1192e8', '#003a6d'];\n  }\n\n  return seLectedPaleteValue;\n}",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "panelId": 1,
+          "refId": "A"
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 8,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data && context.panel.data.series.length > 0) {\n  const fieldsFeatures = context.panel.data.series[0].fields;\n  const fieldsCorrelations = context.panel.data.series[1].fields;\n\n  let uniqueNamesFeature = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n  let featureNames1 = (fieldsCorrelations.find(fields => fields.name == 'name_feature1')).values;\n  let featureNames2 = (fieldsCorrelations.find(fields => fields.name == 'name_feature2')).values;\n  let correlation = (fieldsCorrelations.find(fields => fields.name == 'value')).values;\n\n  // Crear un objeto de correlaciones que asegura las correlaciones recíprocas\n  let correlationMatrix = {};\n\n  // Inicializar las correlaciones con 1 para cada característica consigo misma\n  uniqueNamesFeature.forEach(name => {\n    correlationMatrix[name] = {};\n    uniqueNamesFeature.forEach(otherName => {\n      correlationMatrix[name][otherName] = name === otherName ? 1 : null;\n    });\n  });\n\n  // Llenar la matriz de correlaciones con los valores proporcionados\n  featureNames1.forEach((feature1, index) => {\n    let feature2 = featureNames2[index];\n    let corrValue = correlation[index];\n\n    corrValue = Math.abs(corrValue);\n\n    // Asignar las correlaciones en ambas direcciones (recíprocas)\n    correlationMatrix[feature1][feature2] = corrValue;\n    correlationMatrix[feature2][feature1] = corrValue;\n  });\n\n  let data = uniqueNamesFeature.map(name => {\n    let correlationsForFeature = uniqueNamesFeature.map(otherName => correlationMatrix[name][otherName]);\n    return {\n      name: name,\n      value: correlationsForFeature\n    };\n  });\n\n  let indicator = uniqueNamesFeature.map(name => ({\n    name: name,\n    max: 1\n  }));\n\n  // Configución del gráfico\n  option = {\n    grid: {\n      top: '75%',\n    },\n    title: {\n      text: 'Correlación. Diagrama de radar.',\n      top: \"2%\",\n      left: '1%',\n      textStyle: {\n        fontSize: 22,\n      },\n    },\n    legend: {\n      data: uniqueNamesFeature,\n      top: \"2%\",\n      left: \"83%\",\n      orient: 'vertical',\n      textStyle: {\n        color: '#333333',\n        fontSize: 14\n      },\n      itemStyle: {\n        opacity: 1\n      },\n    },\n    radar: {\n      indicator: indicator,\n      name: {\n        textStyle: {\n          color: '#333333',\n          fontSize: 15\n        }\n      },\n    },\n    series: [\n      {\n        name: 'Budget vs spending',\n        type: 'radar',\n        data: data,\n        symbolSize: 5,\n        itemStyle: {\n          opacity: 0.3\n        },\n        emphasis: {\n          focus: 'self',\n          blurScope: 'global',\n        }\n      },\n    ]\n  };\n\n  return option;\n}\n\n",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "panelId": 1,
+          "refId": "A"
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "description": "Regresión lineal y logística",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 42
+      },
+      "id": 3,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data.series[0].fields.length > 0) {\n  console.log(context.panel.data.series[0].fields)\n  const fields = context.panel.data.series[0].fields;\n\n  let feature = (fields.find(fields => fields.name == 'feature')).values;\n  let coeff = (fields.find(fields => fields.name == 'coeff')).values;\n  let stdErr = (fields.find(fields => fields.name == 'std.err')).values;\n  let value = (fields.find(fields => fields.name == 'value')).values;\n  let p = (fields.find(fields => fields.name == 'p')).values;\n\n  var categoryData = feature;\n  var errorData = [];\n  var barData = coeff;\n  var dataCount = coeff.length;\n\n  for (let i = 0; i < dataCount; i++) {\n    let coef = coeff[i];\n    let std = stdErr[i];\n\n    let low = coef - std;\n    let high = coef + std;\n    errorData.push([i, low, high]);\n  }\n\n  return {\n    tooltip: {\n      trigger: 'axis',\n      axisPointer: {\n        type: 'shadow'\n      },\n      formatter: function (params) {\n        let index = params[0].dataIndex;\n\n        let name = feature[index];\n        let coef = coeff[index];\n        let std = stdErr[index];\n        let tVal = value[index];\n        let pVal = p[index];\n\n        coef = roundToSignificantFigures(coef, 5);\n        std = roundToSignificantFigures(std, 5);\n        tVal = roundToSignificantFigures(tVal, 5);\n        pVal = roundToSignificantFigures(pVal, 5);\n\n        // Determinar tipo de regresión\n        let isLinear = context.grafana.replaceVariables('${typeReg}') === 'linear';\n\n        // Cambiar etiquetas según el tipo de regresión\n        let valueLabel = isLinear ? 't-value' : 'z-value';\n        let pLabel = isLinear ? 'P>|t|' : 'P>|z|';\n\n        return `\n          <div style=\"text-align: center; text-decoration: underline; font-weight: bold;\">${name}</div>\n          <strong>Coeficiente: </strong>${coef}<br>\n          <strong>Desviación estándar: </strong>${std}<br>\n          <strong>${valueLabel}: </strong>${tVal}<br>\n          <strong>${pLabel}: </strong>${pVal}<br>\n        `;\n      }\n    },\n    title: {\n      text: 'Coeficientes y desviación estándar',\n      top: \"2%\",\n      left: \"2%\",\n      textStyle: {\n        fontSize: 22,\n      },\n    },\n    legend: {\n      data: ['bar', 'error'],\n      left: '80%',\n      top: \"2%\",\n      textStyle: {\n        fontSize: 16,\n        color: ' #333'\n      }\n    },\n    grid: {\n      left: \"6%\",\n      right: \"3%\",\n      top: \"14%\"\n    },\n    dataZoom: [\n      {\n        type: 'slider',\n        start: 0,\n        end: 100\n      },\n      {\n        type: 'inside',\n        start: 0,\n        end: 100\n      }\n    ],\n    xAxis: {\n      data: categoryData,\n      nameTextStyle: {\n        fontSize: 14,\n        color: ' #333'\n      },\n      axisLabel: {\n        fontSize: 12,\n        color: ' #333',\n        //rotate: 45\n      },\n    },\n    yAxis: {\n      nameTextStyle: {\n        fontSize: 14,\n        color: ' #333'\n      },\n      axisLabel: {\n        fontSize: 15,\n        color: ' #333'\n      },\n    },\n    series: [\n      {\n        type: 'bar',\n        name: 'bar',\n        data: barData,\n        itemStyle: {\n          color: getColorBar(context.grafana.replaceVariables('${colorsR}')),\n        }\n      },\n      {\n        type: 'custom',\n        name: 'error',\n        itemStyle: {\n          borderWidth: 1.5,\n          color: getColorError(context.grafana.replaceVariables('${colorsR}')),\n        },\n        renderItem: function (params, api) {\n          var xValue = api.value(0);\n          var highPoint = api.coord([xValue, api.value(1)]);\n          var lowPoint = api.coord([xValue, api.value(2)]);\n          var halfWidth = api.size([1, 0])[0] * 0.1;\n          var style = api.style({\n            stroke: api.visual('color'),\n            fill: undefined\n          });\n\n          return {\n            type: 'group',\n            children: [\n              {\n                type: 'line',\n                transition: ['shape'],\n                shape: {\n                  x1: highPoint[0] - halfWidth,\n                  y1: highPoint[1],\n                  x2: highPoint[0] + halfWidth,\n                  y2: highPoint[1]\n                },\n                style: style\n              },\n              {\n                type: 'line',\n                transition: ['shape'],\n                shape: {\n                  x1: highPoint[0],\n                  y1: highPoint[1],\n                  x2: lowPoint[0],\n                  y2: lowPoint[1]\n                },\n                style: style\n              },\n              {\n                type: 'line',\n                transition: ['shape'],\n                shape: {\n                  x1: lowPoint[0] - halfWidth,\n                  y1: lowPoint[1],\n                  x2: lowPoint[0] + halfWidth,\n                  y2: lowPoint[1]\n                },\n                style: style\n              }\n            ]\n          };\n        },\n        encode: {\n          x: 0,\n          y: [1, 2]\n        },\n        data: errorData,\n        z: 100\n      }\n    ]\n  };\n} else {\n  option = {\n    graphic: {\n      elements: [\n        {\n          type: 'text',\n          left: 'center',\n          top: 'center',\n          style: {\n            text: 'No Disponible',\n            fontSize: 50,\n            fontWeight: 'bold',\n            fill: '#555', // Color final estático\n            stroke: 'black',\n            lineWidth: 1\n          }\n        }\n      ]\n    }\n  };\n\n  return option;\n}\n\n// Función para redondear a n cifras significativas\nfunction roundToSignificantFigures(num, n) {\n  return parseFloat(num.toFixed(n));\n}\n\n// Colores bar\nfunction getColorBar(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#77bef7';\n  } else if (color == 'Verde') {\n    selectedColor = '#9EDF9C';\n  } else if (color == 'Naranja') {\n    selectedColor = '#FFB200';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#ffd32c';\n  } else if (color == 'Rosado') {\n    selectedColor = '#FFCCE1';\n  }\n\n  return selectedColor;\n}\n\n// Colores error\nfunction getColorError(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#0043ce';\n  } else if (color == 'Verde') {\n    selectedColor = '#62825D';\n  } else if (color == 'Naranja') {\n    selectedColor = '#EB5B00';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#e0bc00';\n  } else if (color == 'Rosado') {\n    selectedColor = '#E195AB';\n  }\n\n  return selectedColor;\n}",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Datos regresión\n\nSELECT \n    f.name AS feature,\n    f.id,\n    r.coeff,\n    r.std_err AS \"std.err\",\n    r.value AS \"value\",\n    r.p_value AS \"p\"\nFROM \n    grafana_ml_model_regression r\nJOIN \n    grafana_ml_model_feature f ON r.id_feature = f.id\nWHERE r.index=$case AND f.index=$case AND type='$typeReg'",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "description": "Regresión lineal y logística",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 42
+      },
+      "id": 4,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data.series[0].fields.length > 0) {\n  const fields = context.panel.data.series[0].fields;\n\n  let feature = (fields.find(fields => fields.name == 'feature')).values;\n  let coeff = (fields.find(fields => fields.name == 'coeff')).values;\n  let stdErr = (fields.find(fields => fields.name == 'std.err')).values;\n  let value = (fields.find(fields => fields.name == 'value')).values;\n  let p = (fields.find(fields => fields.name == 'p')).values;\n\n  const dimensions1 = [\n    'Característica', 'Coeficiente', 'Mín', 'Máx',\n    'Desviación estándar', 't-value', 'P>|t|'\n  ];\n\n  const dimensions2 = [\n    'Característica', 'Coeficiente', 'Mín', 'Máx',\n    'Desviación estándar', 'z-value', 'P>|z|'\n  ];\n\n\n  let data = [];\n  for (let i = 0; i < feature.length; i++) {\n    let row = [\n      feature[i], // Característica\n      parseFloat(coeff[i].toFixed(5)),  // Coeficiente\n      parseFloat((coeff[i] - stdErr[i]).toFixed(5)),  // Mín\n      parseFloat((coeff[i] + stdErr[i]).toFixed(5)), // Máx\n      parseFloat(stdErr[i].toFixed(5)),  // Desviación estándar\n      parseFloat(value[i].toFixed(5)),  // Value\n      parseFloat(p[i].toFixed(5))  // p\n    ];\n    data.push(row);\n  }\n\n  function renderItem(params, api) {\n    const group = {\n      type: 'group',\n      children: []\n    };\n\n    let coordDims = ['x', 'y'];\n    for (let baseDimIdx = 0; baseDimIdx < 2; baseDimIdx++) {\n      let otherDimIdx = 1 - baseDimIdx;\n      let encode = params.encode;\n      let baseValue = api.value(encode[coordDims[baseDimIdx]][0]);\n      let param = [];\n      param[baseDimIdx] = baseValue;\n      param[otherDimIdx] = api.value(encode[coordDims[otherDimIdx]][1]);\n      let highPoint = api.coord(param);\n      param[otherDimIdx] = api.value(encode[coordDims[otherDimIdx]][2]);\n      let lowPoint = api.coord(param);\n      let halfWidth = 5;\n      var style = api.style({\n        stroke: api.visual('color'),\n        fill: undefined\n      });\n      group.children.push(\n        {\n          type: 'line',\n          transition: ['shape'],\n          shape: makeShape(\n            baseDimIdx,\n            highPoint[baseDimIdx] - halfWidth,\n            highPoint[otherDimIdx],\n            highPoint[baseDimIdx] + halfWidth,\n            highPoint[otherDimIdx]\n          ),\n          style: style\n        },\n        {\n          type: 'line',\n          transition: ['shape'],\n          shape: makeShape(\n            baseDimIdx,\n            highPoint[baseDimIdx],\n            highPoint[otherDimIdx],\n            lowPoint[baseDimIdx],\n            lowPoint[otherDimIdx]\n          ),\n          style: style\n        },\n        {\n          type: 'line',\n          transition: ['shape'],\n          shape: makeShape(\n            baseDimIdx,\n            lowPoint[baseDimIdx] - halfWidth,\n            lowPoint[otherDimIdx],\n            lowPoint[baseDimIdx] + halfWidth,\n            lowPoint[otherDimIdx]\n          ),\n          style: style\n        }\n      );\n    }\n\n    function makeShape(baseDimIdx, base1, value1, base2, value2) {\n      var shape = {};\n      shape[coordDims[baseDimIdx] + '1'] = base1;\n      shape[coordDims[1 - baseDimIdx] + '1'] = value1;\n      shape[coordDims[baseDimIdx] + '2'] = base2;\n      shape[coordDims[1 - baseDimIdx] + '2'] = value2;\n      return shape;\n    }\n    return group;\n  }\n\n  // Configución del gráfico\n  option = {\n    tooltip: {},\n    title: {\n      text: 'Coeficientes y desviación estándar',\n      top: \"2%\",\n      left: \"2%\",\n      textStyle: {\n        fontSize: 22,\n      },\n    },\n    dataZoom: [\n      {\n        type: 'slider'\n      },\n      {\n        type: 'inside'\n      }\n    ],\n    grid: {\n      bottom: 80,\n      left: '10%',\n      right: '4%',\n      top: '14%'\n    },\n    xAxis: {\n      type: 'value',\n      axisLabel: {\n        fontSize: 15,\n        color: ' #333333',\n      },\n    },\n    yAxis: {\n      type: 'category',\n      data: feature,\n      nameTextStyle: {\n        align: 'center',\n      },\n      position: 'left',\n      axisLabel: {\n        margin: 10,\n        color: ' #333333',\n        fontSize: 15,\n      },\n      axisLine: {\n        show: true,\n        lineStyle: {\n          color: 'red',\n          width: 2,\n        }\n      },\n    },\n    series: [\n      {\n        type: 'scatter',\n        data: data,\n        dimensions: (context.grafana.replaceVariables('${typeReg}') == 'linear') ? dimensions1 : dimensions2,\n        symbolSize: context.grafana.replaceVariables('${sizeS}'),\n        encode: {\n          x: 1,\n          y: 0,\n          tooltip: [1, 4, 5, 6],\n          itemName: 0\n        },\n        itemStyle: {\n          color: getColorBar(context.grafana.replaceVariables('${colorsR}')),\n          opacity: 1\n        },\n        symbol: getShape(context.grafana.replaceVariables('${shape}')),\n        z: 200\n      },\n      {\n        type: 'custom',\n        name: 'error',\n        renderItem: renderItem,\n        dimensions: (context.grafana.replaceVariables('${typeReg}') == 'linear') ? dimensions1 : dimensions2,\n        encode: {\n          x: [1, 2, 3],\n          y: [0],\n          tooltip: [1, 2, 3, 4],\n          itemName: 0\n        },\n        data: data,\n        z: 100,\n        itemStyle: {\n          color: getColorError(context.grafana.replaceVariables('${colorsR}')),\n        }\n      }\n    ]\n  };\n\n  return option;\n} else {\n  option = {\n    graphic: {\n      elements: [\n        {\n          type: 'text',\n          left: 'center',\n          top: 'center',\n          style: {\n            text: 'No Disponible',\n            fontSize: 50,\n            fontWeight: 'bold',\n            fill: '#555', // Color final estático\n            stroke: 'black',\n            lineWidth: 1\n          }\n        }\n      ]\n    }\n  };\n\n  return option;\n}\n\n\n// Colores bar\nfunction getColorBar(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#77bef7';\n  } else if (color == 'Verde') {\n    selectedColor = '#9EDF9C';\n  } else if (color == 'Naranja') {\n    selectedColor = '#FFB200';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#ffd32c';\n  } else if (color == 'Rosado') {\n    selectedColor = '#FFCCE1';\n  }\n\n  return selectedColor;\n}\n\n// Colores error\nfunction getColorError(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#0043ce';\n  } else if (color == 'Verde') {\n    selectedColor = '#62825D';\n  } else if (color == 'Naranja') {\n    selectedColor = '#EB5B00';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#e0bc00';\n  } else if (color == 'Rosado') {\n    selectedColor = '#E195AB';\n  }\n\n  return selectedColor;\n}\n\n// Símbolo de los puntos\nfunction getShape(shape) {\n  let seLectedShapeValue = 'circle';\n\n  if (shape == 'Círculo') {\n    seLectedShapeValue = 'circle';\n  } else if (shape == 'Triángulo') {\n    seLectedShapeValue = 'triangle';\n  } else if (shape == 'Rectángulo') {\n    seLectedShapeValue = 'rect';\n  } else if (shape == 'Pin') {\n    seLectedShapeValue = 'pin';\n  }\n\n  return seLectedShapeValue;\n}\n",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "panelId": 3,
+          "refId": "A"
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "description": "Regresión lineal",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "id": 7,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "visual",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "if (context.panel.data.series[1].fields.length > 0 & context.grafana.replaceVariables('${typeReg}') == 'linear') {\n  const fieldsValues = context.panel.data.series[0].fields;\n  const fieldsCoeff = context.panel.data.series[1].fields;\n  const fieldsConst = context.panel.data.series[2].fields;\n  const fieldsTarget = context.panel.data.series[3].fields;\n\n  let values = (fieldsValues.find(fields => fields.name == 'feature_values')).values;\n  let coeff = (fieldsCoeff.find(fields => fields.name == 'coefficient')).values;\n  let cconst = (fieldsConst.find(fields => fields.name == 'const')).values[0];\n  let target = (fieldsTarget.find(fields => fields.name == 'target')).values;\n\n  let parsedValues = values.map(value => JSON.parse(value));\n\n  let result = [];\n\n  for (let i = 0; i < values.length; i++) {\n    let features = parsedValues[i];  // Características del punto\n    let realTarget = target[i];  // Valor real de la variable dependiente para este punto\n\n    // Calcular el valor ajustado (X)\n    let adjustedValue = 0;\n    for (let j = 0; j < features.length - 1; j++) {\n      adjustedValue += features[j] * coeff[j];  // Multiplicar característica por coeficiente\n    }\n\n    adjustedValue += cconst;  // Sumar la constante\n\n    // Calcular el residuo (Y)\n    let residual = realTarget - adjustedValue;\n\n    // Almacenar el valor ajustado y el residuo como un array\n    result.push([adjustedValue, residual]);\n  }\n\n  // Configución del gráfico\n  option = {\n    title: {\n      text: 'Residuos vs. valor ajustado',\n      top: \"2%\",\n      left: \"2%\",\n      textStyle: {\n        fontSize: 22,\n      },\n    },\n    grid: {\n      height: '78%',\n      containLabel: true,\n      left: \"25\",\n      right: \"4%\",\n      top: \"15%\"\n    },\n    tooltip: {\n      trigger: 'item',\n      formatter: function (params) {\n        // Redondear el valor ajustado y el residuo a 2 decimales\n        let adjustedValue = params.data[0].toFixed(3);\n        let residual = params.data[1].toFixed(3);\n\n        return `Valor ajustado: ${adjustedValue}<br>Residuo: ${residual}`;\n      }\n    },\n    xAxis: {\n      name: 'Valor ajustado',\n      nameLocation: 'middle',\n      nameGap: 28,\n      nameTextStyle: {\n        fontSize: 17,\n        color: ' #333333'\n      },\n      axisLabel: {\n        fontSize: 15,\n        color: ' #333333'\n      },\n    },\n    yAxis: {\n      name: 'Residuos',\n      nameLocation: 'middle',\n      nameGap: 35,\n      nameTextStyle: {\n        fontSize: 17,\n        color: ' #333333'\n      },\n      axisLabel: {\n        fontSize: 15,\n        color: ' #333333'\n      },\n    },\n    series: [\n      {\n        symbolSize: context.grafana.replaceVariables('${sizeS}'),\n        data: result,\n        symbol: getShape(context.grafana.replaceVariables('${shape}')),\n        type: 'scatter',\n        itemStyle: {\n          color: getColor(context.grafana.replaceVariables('${colorsR}')),\n          borderColor: '#555',\n        }\n      }\n    ]\n  };\n\n  return option;\n} else {\n\n  option = {\n    graphic: {\n      elements: [\n        {\n          type: 'text',\n          left: 'center',\n          top: 'center',\n          style: {\n            text: 'No Disponible',\n            fontSize: 50,\n            fontWeight: 'bold',\n            fill: '#555', // Color final estático\n            stroke: 'black',\n            lineWidth: 1\n          }\n        }\n      ]\n    }\n  };\n\n  return option;\n}\n\n// Símbolo de los puntos\nfunction getShape(shape) {\n  let seLectedShapeValue = 'circle';\n\n  if (shape == 'Círculo') {\n    seLectedShapeValue = 'circle';\n  } else if (shape == 'Triángulo') {\n    seLectedShapeValue = 'triangle';\n  } else if (shape == 'Rectángulo') {\n    seLectedShapeValue = 'rect';\n  } else if (shape == 'Pin') {\n    seLectedShapeValue = 'pin';\n  }\n\n  return seLectedShapeValue;\n}\n\n// Colores\nfunction getColor(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#77bef7';\n  } else if (color == 'Verde') {\n    selectedColor = '#9EDF9C';\n  } else if (color == 'Naranja') {\n    selectedColor = '#FFB200';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#ffd32c';\n  } else if (color == 'Rosado') {\n    selectedColor = '#FFCCE1';\n  }\n\n  return selectedColor;\n}\n\n\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Puntos y sus características\n\nSELECT \n  p.name AS point_name, \n  array_to_json(array_agg(pv.value ORDER BY pv.id_feature)) AS feature_values\nFROM \"grafana_ml_model_point\" p\nJOIN \"grafana_ml_model_point_value\" pv \n  ON pv.id_point = p.id\nLEFT JOIN \"grafana_ml_model_feature\" f \n  ON f.id = pv.id_feature\nLEFT JOIN \"grafana_ml_model_regression\" r \n  ON r.id_feature = f.id AND r.id_feature IS NULL\nWHERE p.index = $case\n  AND pv.index = $case\n  AND (f.id IS NULL OR r.id_feature IS NULL)  -- Excluir target\nGROUP BY p.id\nLIMIT 500;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Características y coeficientes\n\nSELECT \n    f.name,\n    r.coeff AS coefficient\nFROM \n    grafana_ml_model_regression r\nJOIN \n    grafana_ml_model_feature f \n    ON r.id_feature = f.id\nWHERE \n    r.index = $case \n    AND f.index = $case \n    AND type = 'linear'\n    AND f.id IS NOT NULL\nORDER BY f.id",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Constante\n\nSELECT \n    r.coeff AS const\nFROM \n    grafana_ml_model_regression r\nWHERE \n    r.id_feature IS NULL\n    AND type = 'linear'\n    AND r.index = $case;",
+          "refId": "C",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Target\n\nSELECT DISTINCT ON (p.id) \n  p.name AS point_name, \n  pv.value AS target\nFROM \"grafana_ml_model_point\" p\nJOIN \"grafana_ml_model_point_value\" pv \n  ON pv.id_point = p.id\nLEFT JOIN \"grafana_ml_model_feature\" f \n  ON f.id = pv.id_feature\nLEFT JOIN \"grafana_ml_model_regression\" r \n  ON r.id_feature = f.id\nWHERE p.index = $case\n  AND pv.index = $case\n  AND r.id_feature IS NULL  \nORDER BY p.id, pv.id_feature\nLIMIT 500;",
+          "refId": "D",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "description": "Regresión lineal",
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "id": 5,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data.series[3].fields.length > 0 & context.grafana.replaceVariables('${typeReg}') == 'linear') {\n  const fieldsPoints = context.panel.data.series[0].fields;\n  const fieldsFeatures = context.panel.data.series[1].fields;\n  const fieldsTarget = context.panel.data.series[2].fields;\n\n  let pointNames = (fieldsPoints.find(fields => fields.name == 'point_name')).values;\n  let pointValues = (fieldsPoints.find(fields => fields.name == 'feature_values')).values;\n  let featuresName = (fieldsFeatures.find(fields => fields.name == 'name')).values;\n  let target = (fieldsTarget.find(fields => fields.name == 'feature')).values[0];\n\n  let parsedValuesPoints = pointValues.map(value => JSON.parse(value));\n\n  let selectedFeature = 0;\n  let posTarget = featuresName.indexOf(target);\n\n  // Lógica para la selección\n  if (context.grafana.replaceVariables('${case}')) {\n    let dom = context.panel.chart.getDom();\n    let nodeList = dom.childNodes;\n\n    if (nodeList.length >= 2) {\n      nodeList[0].remove();\n    }\n\n    const container = document.createElement(\"div\");\n    container.style.display = \"flex\";\n    container.style.justifyContent = \"space-between\";\n    container.style.alignItems = \"center\";\n    container.style.marginTop = \"10px\";\n\n    const title = document.createElement(\"h3\");\n    title.innerHTML = \"Regresión lineal\";\n    title.style.marginLeft = \"20px\";\n    title.style.fontWeight = \"bold\";\n    title.style.fontSize = \"22px\";\n    title.style.fontFamily = \"'Arial', sans-serif\";\n\n    const rightContainer = document.createElement(\"div\");\n    rightContainer.style.display = \"flex\";\n    rightContainer.style.alignItems = \"center\";\n\n    const characteristicLabel = document.createElement(\"span\");\n    characteristicLabel.innerHTML = \"Variable independiente:\";\n    characteristicLabel.style.marginRight = \"6px\";\n    characteristicLabel.style.fontFamily = \"'Arial', sans-serif\";\n    characteristicLabel.style.fontWeight = \"bold\";\n    characteristicLabel.style.fontSize = \"20px\";\n\n    const selectList = document.createElement(\"select\");\n    selectList.id = \"mySelect\";\n    selectList.style.fontFamily = \"'Arial', sans-serif\";\n    selectList.style.border = \"1px solid gray\";\n    selectList.style.borderRadius = \"8px\";\n    selectList.style.padding = \"5px\";\n    selectList.style.marginRight = \"10px\";\n\n    featuresName.forEach((value) => {\n      const option = document.createElement(\"option\");\n      option.value = value;\n      option.text = value;\n      selectList.appendChild(option);\n    });\n\n    selectList.addEventListener(\"change\", () => {\n      let selectedNameFeature = selectList.value;\n      selectedFeature = featuresName.indexOf(selectedNameFeature);\n      let result = createSeriesData(parsedValuesPoints, selectedFeature, posTarget);\n\n      context.panel.chart.setOption({\n        dataset: [\n          {\n            source: result\n          },\n          {\n            transform: {\n              type: 'ecStat:regression',\n            }\n          }\n        ]\n      });\n    });\n\n    rightContainer.appendChild(characteristicLabel);\n    rightContainer.appendChild(selectList);\n\n    container.appendChild(title);\n    container.appendChild(rightContainer);\n\n    dom.insertBefore(container, dom.firstChild);\n\n  }\n\n  // Lógica para la selección\n  options = {\n    grid: {\n      bottom: \"15%\",\n      containLabel: true,\n      left: \"3%\",\n      right: \"4%\",\n      top: \"11%\",\n    },\n    dataset: [\n      {\n        source: createSeriesData(parsedValuesPoints, selectedFeature, posTarget)\n      },\n      {\n        transform: {\n          type: 'ecStat:regression',\n          // 'linear' by default.\n          // config: { method: 'linear', formulaOn: 'end' }\n        }\n      }\n    ],\n    legend: {\n      left: '5%',\n      top: '1%',\n      textStyle: {\n        fontSize: 16,\n        color: ' #333'\n      },\n    },\n    tooltip: {\n      trigger: 'axis',\n      axisPointer: {\n        type: 'cross',\n      },\n      formatter: function (params) {\n        let result = '';\n        let seenLine = false;\n\n        params.forEach(function (item) {\n          let value = parseFloat(item.value[1]);  // Asegúrate de que sea un número\n          value = Math.round(value * 10000) / 10000;  // Redondea a 3 cifras después de la coma\n\n          // Obtén el color del item. Esto puede ser a través de 'item.color' o 'item.itemStyle.color', depende de la configuración.\n          let color = item.color || item.itemStyle?.color || '#000000';  // Si no se encuentra, usa negro por defecto\n\n          if (item.seriesType === 'line' && !seenLine) {\n            result += '<span style=\"display:inline-block;width:10px;height:10px;background-color:' + color + ';border-radius:50%;margin-right:5px;\"></span>';\n            result += item.seriesName + ': ' + value + '<br>';\n            seenLine = true;\n          } else if (item.seriesType !== 'line') {\n            result += '<span style=\"display:inline-block;width:10px;height:10px;background-color:' + color + ';border-radius:50%;margin-right:5px;\"></span>';\n            result += item.seriesName + ': ' + value + '<br>';\n          }\n        });\n\n        return result;\n      }\n    },\n    xAxis: {\n      name: featuresName[selectedFeature],\n      nameLocation: 'middle',\n      nameGap: 23,\n      splitLine: {\n        lineStyle: {\n          type: 'dashed'\n        }\n      },\n      nameTextStyle: {\n        fontSize: 16,\n        color: ' #333'\n      },\n      axisLabel: {\n        fontSize: 15,\n        color: ' #333'\n      },\n    },\n    yAxis: {\n      name: featuresName[posTarget],\n      nameLocation: 'middle',\n      nameGap: 36,\n      splitLine: {\n        lineStyle: {\n          type: 'dashed'\n        }\n      },\n      nameTextStyle: {\n        fontSize: 16,\n        color: ' #333'\n      },\n      axisLabel: {\n        fontSize: 15,\n        color: ' #333'\n      },\n    },\n    series: [\n      {\n        name: 'scatter',\n        type: 'scatter',\n        symbolSize: context.grafana.replaceVariables('${sizeS}'),\n        symbol: getShape(context.grafana.replaceVariables('${shape}')),\n        itemStyle: {\n          color: getColor(context.grafana.replaceVariables('${colorsR}')),\n          borderColor: '#555',\n        }\n      },\n      {\n        name: 'line',\n        type: 'line',\n        datasetIndex: 1,\n        symbolSize: 0.1,\n        symbol: 'circle',\n        label: { show: true, fontSize: 18, fontWeight: 'bold' },\n        labelLayout: { dx: -20 },\n        itemStyle: {\n          color: getColorLine(context.grafana.replaceVariables('${colorsR}'))\n        },\n        encode: { label: 2, tooltip: 1 }\n      }\n    ]\n  }\n\n  import(\"https://esm.sh/echarts-stat@1.2.0\").then(({ default: ecStatImport }) => {\n    context.echarts.registerTransform(ecStatImport.transform.regression);\n    context.panel.chart.setOption(options)\n  });\n\n} else {\n\n  let dom = context.panel.chart.getDom();\n  let nodeList = dom.childNodes;\n  if (nodeList.length >= 2) {\n    nodeList[0].remove();\n  }\n\n  option = {\n    graphic: {\n      elements: [\n        {\n          type: 'text',\n          left: 'center',\n          top: 'center',\n          style: {\n            text: 'No Disponible',\n            fontSize: 50,\n            fontWeight: 'bold',\n            fill: '#555', // Color final estático\n            stroke: 'black',\n            lineWidth: 1\n          }\n        }\n      ]\n    }\n  };\n\n  return option;\n}\n\n// Array de 2 dimensiones\nfunction createSeriesData(values, dim1Index, dim2Index) {\n  return values.map((value) => {\n    const dim1 = value[dim1Index];\n    const dim2 = value[dim2Index];\n\n    return [dim1, dim2];\n  });\n}\n\n// Símbolo de los puntos\nfunction getShape(shape) {\n  let seLectedShapeValue = 'circle';\n\n  if (shape == 'Círculo') {\n    seLectedShapeValue = 'circle';\n  } else if (shape == 'Triángulo') {\n    seLectedShapeValue = 'triangle';\n  } else if (shape == 'Rectángulo') {\n    seLectedShapeValue = 'rect';\n  } else if (shape == 'Pin') {\n    seLectedShapeValue = 'pin';\n  }\n\n  return seLectedShapeValue;\n}\n\n// Color de los puntos\nfunction getColor(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#77bef7';\n  } else if (color == 'Verde') {\n    selectedColor = '#9EDF9C';\n  } else if (color == 'Naranja') {\n    selectedColor = '#FFB200';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#ffd32c';\n  } else if (color == 'Rosado') {\n    selectedColor = '#FFCCE1';\n  }\n\n  return selectedColor;\n}\n\n// Color de la línea\nfunction getColorLine(color) {\n  let selectedColor = 'blue';\n\n  if (color == 'Azul') {\n    selectedColor = '#0043ce';\n  } else if (color == 'Verde') {\n    selectedColor = '#62825D';\n  } else if (color == 'Naranja') {\n    selectedColor = '#EB5B00';\n  } else if (color == 'Amarillo') {\n    selectedColor = '#e0bc00';\n  } else if (color == 'Rosado') {\n    selectedColor = '#E195AB';\n  }\n\n  return selectedColor;\n}",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Puntos y sus características\n\nSELECT \n  p.name AS point_name, \n  array_to_json(array_agg(pv.value ORDER BY pv.id_feature)) AS feature_values\nFROM \"grafana_ml_model_point\" p\nJOIN \"grafana_ml_model_point_value\" pv \n  ON pv.id_point = p.id\nWHERE p.index = $case\n  AND pv.index = $case\nGROUP BY p.id\nLIMIT 500;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Características\n\nSELECT name\nFROM grafana_ml_model_feature\nWHERE index = $case \nORDER BY id\n",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Target\n\nSELECT \n    f.name AS feature\nFROM \n    grafana_ml_model_feature f\nLEFT JOIN \n    grafana_ml_model_regression r ON r.id_feature = f.id \nWHERE \n    f.index = $case     \n    AND f.index=$case\n    AND r.id_feature IS NULL",
+          "refId": "C",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Constante\n\nSELECT \n    r.coeff AS const\nFROM \n    grafana_ml_model_regression r\nWHERE \n    r.id_feature IS NULL\n    AND type = 'linear'\n    AND r.index = $case;",
+          "refId": "D",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    },
+    {
+      "datasource": {
+        "default": false,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee5kgy51tyrcwa"
+      },
+      "description": "Regresión logística",
+      "gridPos": {
+        "h": 17,
+        "w": 12,
+        "x": 0,
+        "y": 70
+      },
+      "id": 9,
+      "options": {
+        "baidu": {
+          "callback": "bmapReady",
+          "key": ""
+        },
+        "editor": {
+          "format": "auto"
+        },
+        "editorMode": "code",
+        "gaode": {
+          "key": "",
+          "plugin": "AMap.Scale,AMap.ToolBar"
+        },
+        "getOption": "if (context.panel.data.series[1].fields.length > 0 & context.grafana.replaceVariables('${typeReg}') == 'logistic') {\n  const fieldsValues = context.panel.data.series[0].fields;\n  const fieldsCoeff = context.panel.data.series[1].fields;\n  const fieldsConst = context.panel.data.series[2].fields;\n  const fieldsTarget = context.panel.data.series[3].fields;\n\n  let values = (fieldsValues.find(fields => fields.name == 'feature_values')).values;\n  let coeff = (fieldsCoeff.find(fields => fields.name == 'coefficient')).values;\n  let cconst = (fieldsConst.find(fields => fields.name == 'const')).values[0];\n  let target = (fieldsTarget.find(fields => fields.name == 'target')).values;\n\n  let parsedValues = values.map(value => JSON.parse(value));\n\n  let confusionMatrix = {\n    TP: 0,  // Verdaderos positivos\n    FP: 0,  // Falsos positivos\n    TN: 0,  // Verdaderos negativos\n    FN: 0   // Falsos negativos\n  };\n\n  // Umbral de decisión para clasificación binaria (por lo general se usa 0.5)\n  const threshold = 0.5;\n\n  for (let i = 0; i < values.length; i++) {\n    let features = parsedValues[i];  // Características del punto\n    let realTarget = target[i];  // Valor real de la variable dependiente para este punto\n\n    // Calcular el valor ajustado (probabilidad) con la fórmula de regresión logística\n    let z = 0;\n    for (let j = 0; j < features.length - 1; j++) {\n      z += features[j] * coeff[j];  // Multiplicar característica por coeficiente\n    }\n\n    z += cconst;  // Sumamos la constante (intercepto)\n\n    // Función sigmoide para obtener la probabilidad\n    let probability = 1 / (1 + Math.exp(-z));  // Sigmoid: 1 / (1 + exp(-z))\n\n    // Clasificación basada en el umbral\n    let predictedClass = probability >= threshold ? 1 : 0;\n\n    // Actualizar la matriz de confusión\n    if (predictedClass === 1 && realTarget === 1) {\n      confusionMatrix.TP++;  // Verdaderos positivos\n    } else if (predictedClass === 1 && realTarget === 0) {\n      confusionMatrix.FP++;  // Falsos positivos\n    } else if (predictedClass === 0 && realTarget === 0) {\n      confusionMatrix.TN++;  // Verdaderos negativos\n    } else if (predictedClass === 0 && realTarget === 1) {\n      confusionMatrix.FN++;  // Falsos negativos\n    }\n  }\n\n  // Aquí puedes ver el contenido de la matriz de confusión\n  console.log(\"Matriz de Confusión:\", confusionMatrix);\n\n  // Definir los ejes y los datos para el heatmap\n  const ejeX = ['Positivo', 'Negativo'];\n  const ejeY = ['Negativo', 'Positivo'];\n  const data1 = [\n    [0, 0, confusionMatrix.FN], [0, 1, confusionMatrix.TP],\n    [1, 0, confusionMatrix.TN], [1, 1, confusionMatrix.FP]\n  ];\n\n  // Colores para celdas (rojo para FP y FN, verde para TP y TN)\n  const cellColors = {\n    FP: '#F19292',  // Rojo para Falsos Positivos\n    FN: '#F19292',  // Rojo para Falsos Negativos\n    TP: '#9FE6A0',  // Verde para Verdaderos Positivos\n    TN: '#9FE6A0'   // Verde para Verdaderos Negativos\n  };\n\n  return {\n    title: {\n      text: 'Matriz de confusión',\n      top: \"2%\",\n      left: \"2%\",\n      textStyle: {\n        fontSize: 22,\n      },\n    },\n    grid: {\n      height: '70%',\n      top: '15%',\n      right: '15%'\n    },\n    xAxis: {\n      type: 'category',\n      data: ejeX,\n      name: 'Valores reales',\n      nameLocation: 'middle',\n      nameGap: 35,\n      splitArea: {\n        show: true\n      },\n      nameTextStyle: {\n        fontSize: 19,\n        color: ' #333333'\n      },\n      axisLabel: {\n        fontSize: 16,\n        color: ' #333333'\n      },\n    },\n    yAxis: {\n      type: 'category',\n      data: ejeY,\n      name: 'Valores predichos',\n      nameLocation: 'middle',\n      nameGap: 35,\n      splitArea: {\n        show: true\n      },\n      nameTextStyle: {\n        fontSize: 19,\n        color: ' #333333'\n      },\n      axisLabel: {\n        fontSize: 16,\n        color: ' #333333',\n        rotate: 90,\n      },\n    },\n    series: [\n      {\n        name: 'Matriz de Confusión',\n        type: 'heatmap',\n        data: [\n          [0, 0, confusionMatrix.FN],\n          [0, 1, confusionMatrix.TP],\n          [1, 0, confusionMatrix.TN],\n          [1, 1, confusionMatrix.FP]\n        ],\n        label: {\n          show: true,\n          formatter: function (params) {\n            const value = params.value[2]; // Obtiene el valor numérico\n            const x = params.value[0]; // Posición X (real)\n            const y = params.value[1]; // Posición Y (predicción)\n\n            let label = '';\n            // Definir el formato de la etiqueta, separando el número y el texto\n            if (x === 0 && y === 0) {\n              label = `{num|${value}}\\n{txt|Falsos negativos}`;\n            } else if (x === 0 && y === 1) {\n              label = `{num|${value}}\\n{txt|Verdaderos positivos}`;\n            } else if (x === 1 && y === 0) {\n              label = `{num|${value}}\\n{txt|Verdaderos negativos}`;\n            } else if (x === 1 && y === 1) {\n              label = `{num|${value}}\\n{txt|Falsos positivos}`;\n            }\n\n            return label;\n          },\n          rich: {\n            num: {\n              fontSize: 36, // Tamaño grande para el número\n              align: 'center', // Alineación horizontal centrada\n              verticalAlign: 'middle' // Alineación vertical centrada\n            },\n            txt: {\n              fontSize: 20, // Tamaño pequeño para la etiqueta\n              align: 'center', // Alineación horizontal centrada\n              verticalAlign: 'middle', // Alineación vertical centrada\n            }\n          }\n        },\n        itemStyle: {\n          normal: {\n            color: function (params) {\n              const value = params.value[2]; // Obtiene el valor de la celda\n              if (params.value[0] === 0 && params.value[1] === 0) {\n                return cellColors.FN;\n              } else if (params.value[0] === 0 && params.value[1] === 1) {\n                return cellColors.TP;\n              } else if (params.value[0] === 1 && params.value[1] === 0) {\n                return cellColors.TN;\n              } else if (params.value[0] === 1 && params.value[1] === 1) {\n                return cellColors.FP;\n              }\n              return '#fff';\n            }\n          }\n        },\n        emphasis: {\n          itemStyle: {\n            shadowBlur: 10,\n            shadowColor: 'rgba(0, 0, 0, 0.5)'\n          }\n        }\n      }\n    ]\n  };\n} else {\n  option = {\n    graphic: {\n      elements: [\n        {\n          type: 'text',\n          left: 'center',\n          top: 'center',\n          style: {\n            text: 'No Disponible',\n            fontSize: 50,\n            fontWeight: 'bold',\n            fill: '#555', // Color final estático\n            stroke: 'black',\n            lineWidth: 1\n          }\n        }\n      ]\n    }\n  };\n\n  return option;\n}\n\n\n\n\n",
+        "google": {
+          "callback": "gmapReady",
+          "key": ""
+        },
+        "map": "none",
+        "renderer": "canvas",
+        "themeEditor": {
+          "config": "{}",
+          "name": "default"
+        },
+        "visualEditor": {
+          "code": "\n",
+          "dataset": [],
+          "series": []
+        }
+      },
+      "pluginVersion": "6.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "-- Puntos y sus características\n\nSELECT \n  p.name AS point_name, \n  array_to_json(array_agg(pv.value ORDER BY pv.id_feature)) AS feature_values\nFROM \"grafana_ml_model_point\" p\nJOIN \"grafana_ml_model_point_value\" pv \n  ON pv.id_point = p.id\nLEFT JOIN \"grafana_ml_model_feature\" f \n  ON f.id = pv.id_feature\nLEFT JOIN \"grafana_ml_model_regression\" r \n  ON r.id_feature = f.id AND r.id_feature IS NULL\nWHERE p.index = $case\n  AND pv.index = $case\n  AND (f.id IS NULL OR r.id_feature IS NULL)  -- Excluir target\nGROUP BY p.id;\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Coeficientes\n\nSELECT \n    f.name,\n    r.coeff AS coefficient\nFROM \n    grafana_ml_model_regression r\nJOIN \n    grafana_ml_model_feature f \n    ON r.id_feature = f.id\nWHERE \n    r.index = $case \n    AND f.index = $case \n    AND type = 'logistic'\n    AND f.id IS NOT NULL\nORDER BY f.id",
+          "refId": "B",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Constante\n\nSELECT \n    r.coeff AS const\nFROM \n    grafana_ml_model_regression r\nWHERE \n    r.id_feature IS NULL\n    AND type = 'logistic'\n    AND r.index = $case;",
+          "refId": "C",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee5kgy51tyrcwa"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "-- Target\n\nSELECT DISTINCT ON (p.id) \n  p.name AS point_name, \n  pv.value AS target\nFROM \"grafana_ml_model_point\" p\nJOIN \"grafana_ml_model_point_value\" pv \n  ON pv.id_point = p.id\nLEFT JOIN \"grafana_ml_model_feature\" f \n  ON f.id = pv.id_feature\nLEFT JOIN \"grafana_ml_model_regression\" r \n  ON r.id_feature = f.id\nWHERE p.index = $case\n  AND pv.index = $case\n  AND r.id_feature IS NULL  \nORDER BY p.id, pv.id_feature;",
+          "refId": "D",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "type": "volkovlabs-echarts-panel"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "2",
+          "value": "2"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "ee5kgy51tyrcwa"
+        },
+        "definition": "SELECT index\nFROM grafana_ml_model_regression",
+        "description": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Caso",
+        "multi": false,
+        "name": "case",
+        "options": [],
+        "query": "SELECT index\nFROM grafana_ml_model_regression",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "pearson",
+          "value": "pearson"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "ee5kgy51tyrcwa"
+        },
+        "definition": "SELECT DISTINCT type\nFROM grafana_ml_model_correlation;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Tipo correlación",
+        "multi": false,
+        "name": "typeCor",
+        "options": [],
+        "query": "SELECT DISTINCT type\nFROM grafana_ml_model_correlation;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "linear",
+          "value": "linear"
+        },
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "ee5kgy51tyrcwa"
+        },
+        "definition": "SELECT DISTINCT type\nFROM grafana_ml_model_regression",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Tipo de regresión",
+        "multi": false,
+        "name": "typeReg",
+        "options": [],
+        "query": "SELECT DISTINCT type\nFROM grafana_ml_model_regression",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Paleta 1",
+          "value": "Paleta 1"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Color correlación ",
+        "multi": false,
+        "name": "colorsC",
+        "options": [
+          {
+            "selected": true,
+            "text": "Paleta 1",
+            "value": "Paleta 1"
+          },
+          {
+            "selected": false,
+            "text": "Paleta 2",
+            "value": "Paleta 2"
+          },
+          {
+            "selected": false,
+            "text": "Paleta 3",
+            "value": "Paleta 3"
+          }
+        ],
+        "query": "Paleta 1, Paleta 2, Paleta 3",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Azul",
+          "value": "Azul"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Color regresión",
+        "multi": false,
+        "name": "colorsR",
+        "options": [
+          {
+            "selected": true,
+            "text": "Azul",
+            "value": "Azul"
+          },
+          {
+            "selected": false,
+            "text": "Verde",
+            "value": "Verde"
+          },
+          {
+            "selected": false,
+            "text": "Naranja",
+            "value": "Naranja"
+          },
+          {
+            "selected": false,
+            "text": "Amarillo",
+            "value": "Amarillo"
+          },
+          {
+            "selected": false,
+            "text": "Rosado",
+            "value": "Rosado"
+          }
+        ],
+        "query": "Azul, Verde, Naranja, Amarillo, Rosado",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Círculo",
+          "value": "Círculo"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Símbolo",
+        "multi": false,
+        "name": "shape",
+        "options": [
+          {
+            "selected": true,
+            "text": "Círculo",
+            "value": "Círculo"
+          },
+          {
+            "selected": false,
+            "text": "Triángulo",
+            "value": "Triángulo"
+          },
+          {
+            "selected": false,
+            "text": "Rectángulo",
+            "value": "Rectángulo"
+          },
+          {
+            "selected": false,
+            "text": "Pin",
+            "value": "Pin"
+          }
+        ],
+        "query": "Círculo, Triángulo, Rectángulo, Pin",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "10",
+          "value": "10"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Tamaño símbolo",
+        "multi": false,
+        "name": "sizeS",
+        "options": [
+          {
+            "selected": true,
+            "text": "10",
+            "value": "10"
+          },
+          {
+            "selected": false,
+            "text": "15",
+            "value": "15"
+          },
+          {
+            "selected": false,
+            "text": "20",
+            "value": "20"
+          }
+        ],
+        "query": "10, 15, 20",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "2-correlation-regression",
+  "uid": "ce5x9ukdpr8cgd",
+  "version": 295,
+  "weekStart": ""
+}
